@@ -21,6 +21,7 @@ target_link_libraries(
     ${CPPTABLE_LIB_NAME}
     PUBLIC
         fmt::fmt
+        mp-units::mp-units
 )
 
 target_compile_options(

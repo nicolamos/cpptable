@@ -11,12 +11,12 @@ int main()
     std::cout << "CIAO" << std::endl;
 
     using row_type = std::tuple<int, int>;
-    using table = tbl::basic_table<row_type>;
+    using table = tbl::basic_table<row_type, tbl::meta_data<>>;
 
     table t = {{2, 3}};
 
     for (auto& row : t) {
-        std::cout << fmt::format("{}\n", row);
+        fmt::println("{}", row);
     }
 
     return 0;
