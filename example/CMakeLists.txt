@@ -1,3 +1,5 @@
+add_subdirectory("mp-units/src")
+
 set(CPPTABLE_EXE_NAME example CACHE INTERNAL "Name of the executable")
 
 set(
@@ -11,6 +13,7 @@ target_link_libraries(
     ${CPPTABLE_EXE_NAME}
 PUBLIC
     ${PROJECT_NAME}::${CPPTABLE_LIB_NAME}
+    mp-units::mp-units
 )
 
 target_compile_options(

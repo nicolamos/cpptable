@@ -16,8 +16,18 @@ struct position
 };
 
 
-template <typename... ColumnT>
-class meta_data
+template <typename T>
+struct column_info
+{
+    using value_type = T;
+
+    constexpr operator std::string() const { return name; }
+
+    std::string name;
+};
+
+
+class default_header
 {
 public:
 
@@ -26,11 +36,16 @@ private:
 };
 
 
-template <typename RowT, typename MetaT, typename ContainerT = std::vector<RowT>>
-class basic_table
+template <
+    typename HeaderT = default_header,
+    typename ContainerT = std::vector<typename HeaderT::row_type>
+>
+class basic_table : private HeaderT
 {
 public:
-    using row_type = RowT;
+    using super = HeaderT;
+    using typename super::header_type;
+    using typename super::row_type;
     using container_type = ContainerT;
     using iterator = typename container_type::iterator;
     using const_iterator = typename container_type::const_iterator;

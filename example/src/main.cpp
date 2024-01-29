@@ -1,23 +1,30 @@
 #include <iostream>
 #include <tuple>
+#include <format>
 #include <fmt/core.h>
 #include <fmt/ranges.h>
+#include <mp-units/format.h>
+#include <mp-units/systems/si/si.h>
 
 #include "cpptable/cpptable.hpp"
+
+using namespace mp_units;
 
 
 int main()
 {
-    std::cout << "CIAO" << std::endl;
+    using si::unit_symbols::cm;
 
-    using row_type = std::tuple<int, int>;
-    using table = tbl::basic_table<row_type, tbl::meta_data<>>;
+    std::cout << std::format("{}", 34 * cm) << std::endl;
 
-    table t = {{2, 3}};
+    // using row_type = std::tuple<int, int>;
+    // using table = tbl::basic_table<row_type>;
 
-    for (auto& row : t) {
-        fmt::println("{}", row);
-    }
+    // table t = {{2, 3}};
+
+    // for (auto& row : t) {
+    //     fmt::println("{}", row);
+    // }
 
     return 0;
 }

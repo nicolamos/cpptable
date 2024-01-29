@@ -36,14 +36,6 @@ endif()
 
 CPMAddPackage("gh:fmtlib/fmt#10.2.1")
 CPMAddPackage("gh:gsl-lite/gsl-lite#v0.41.0")
-CPMAddPackage(
-    NAME mp-units
-    DOWNLOAD_ONLY YES
-)
-
-if(mp-units_ADDED)
-    add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/_deps/mp-units-src/src)
-endif()
 
 message(STATUS "Configuration of cpptable library")
 add_subdirectory(cpptable)
