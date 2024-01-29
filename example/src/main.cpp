@@ -1,8 +1,8 @@
 #include <iostream>
 #include <tuple>
-#include <format>
 #include <fmt/core.h>
 #include <fmt/ranges.h>
+#include <fmt/ostream.h>
 #include <mp-units/format.h>
 #include <mp-units/systems/si/si.h>
 
@@ -15,7 +15,7 @@ int main()
 {
     using si::unit_symbols::cm;
 
-    std::cout << std::format("{}", 34 * cm) << std::endl;
+    std::cout << fmt::format("{}", 34 * cm) << std::endl;
 
     // using row_type = std::tuple<int, int>;
     // using table = tbl::basic_table<row_type>;

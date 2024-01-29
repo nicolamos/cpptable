@@ -3,6 +3,7 @@
 #define CPPTABLE_HPP
 
 #include <vector>
+#include <string>
 
 namespace tbl
 {

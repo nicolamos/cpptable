@@ -1,4 +1,18 @@
-add_subdirectory("mp-units/src")
+CPMAddPackage("gh:gsl-lite/gsl-lite#v0.41.0")
+
+FetchContent_Declare(
+    mp-units
+    GIT_REPOSITORY "https://github.com/mpusz/mp-units.git"
+    GIT_TAG v2.1.0
+    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/mp-units
+    BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/mp-units-build
+)
+
+FetchContent_Populate(mp-units)
+
+if(mp-units_POPULATED)
+    add_subdirectory(${mp-units_SOURCE_DIR}/src ${mp-units_BINARY_DIR})
+endif()
 
 set(CPPTABLE_EXE_NAME example CACHE INTERNAL "Name of the executable")
 
