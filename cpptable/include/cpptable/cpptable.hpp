@@ -2,8 +2,10 @@
 #ifndef CPPTABLE_HPP
 #define CPPTABLE_HPP
 
+#include <utility>
 #include <vector>
 #include <string>
+
 
 namespace tbl
 {
@@ -31,6 +33,7 @@ struct column_info
 class default_header
 {
 public:
+    using row_type = std::tuple<int, int>;
 
 private:
 
@@ -45,14 +48,14 @@ class basic_table : private HeaderT
 {
 public:
     using super = HeaderT;
-    using typename super::header_type;
+    using header_type = HeaderT;
     using typename super::row_type;
     using container_type = ContainerT;
     using iterator = typename container_type::iterator;
     using const_iterator = typename container_type::const_iterator;
 
-    basic_table() = default;
-    basic_table(std::initializer_list<row_type> args) : rows_{args} {}
+    constexpr basic_table() = default;
+    constexpr basic_table(std::initializer_list<row_type> args) : rows_{args} {}
     basic_table(container_type rows) : rows_{std::move(rows)} {}
 
     constexpr const_iterator begin() const { return rows_.begin(); }

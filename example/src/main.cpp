@@ -17,14 +17,13 @@ int main()
 
     std::cout << fmt::format("{}", 34 * cm) << std::endl;
 
-    // using row_type = std::tuple<int, int>;
-    // using table = tbl::basic_table<row_type>;
+    using table = tbl::basic_table<>;
 
-    // table t = {{2, 3}};
+    table t = {{2, 3}};
 
-    // for (auto& row : t) {
-    //     fmt::println("{}", row);
-    // }
+    for (auto& row : t) {
+        fmt::println("{}", row);
+    }
 
     return 0;
 }
