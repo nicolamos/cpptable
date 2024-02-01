@@ -26,6 +26,19 @@ struct fmt::formatter<tbl::column_info<quantity<r, T>>> : fmt::formatter<std::pa
 };
 
 
+namespace tbl
+{
+
+template <Reference auto... Rs>
+struct qtable : public table<quantity<Rs>...>
+{
+    using super = table<quantity<Rs>...>;
+    using super::super;
+};
+
+}
+
+
 int main()
 {
     using si::unit_symbols::cm;
@@ -44,6 +57,12 @@ int main()
     }
 
     fmt::println("{}", t.header);
+
+    using qtable = tbl::qtable<isq::length[cm], isq::time[si::second]>;
+    qtable qt{"c1", "c2"};
+
+    fmt::println("{}", qt.header);
+
 
     return 0;
 }
