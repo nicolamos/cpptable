@@ -8,7 +8,6 @@
 #include <string>
 #include <string_view>
 #include <ranges>
-#include <fmt/core.h>
 #include <fmt/format.h>
 
 
