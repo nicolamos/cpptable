@@ -35,7 +35,7 @@ template <typename... Ts>
 struct default_header
 {
     using row_type = std::tuple<Ts...>;
-    using column_type = std::tuple<column_info<Ts>...>;
+    using column_tuple = std::tuple<column_info<Ts>...>;
 
     constexpr default_header(column_info<Ts>... cinfo) : columns{std::move(cinfo)...} {}
 
@@ -43,7 +43,12 @@ struct default_header
         return std::apply([](const auto&... args) { return std::array<std::string, sizeof...(args)>{args.name...}; }, columns);
     }
 
-    column_type columns;
+    template <std::size_t I>
+    struct column { using type = typename std::tuple_element_t<I, column_tuple>::value_type; };
+    template <std::size_t I>
+    using column_t = typename column<I>::type;
+
+    column_tuple columns;
 };
 
 
@@ -60,7 +65,6 @@ class basic_table
 public:
     using header_type = HeaderT;
     using row_type = typename header_type::row_type;
-    using column_type = typename header_type::column_type;
     using container_type = ContainerT;
     using reference = typename container_type::reference;
     using iterator = typename container_type::iterator;
@@ -80,6 +84,10 @@ public:
     constexpr reference emplace_back(Args&&... args) { return rows_.emplace_back(std::forward<Args>(args)...); }
 
     constexpr auto names() const { return header.names(); }
+
+    operator[](std::size_t i) {
+        using column_type
+    }
 
 private:
     container_type rows_;
