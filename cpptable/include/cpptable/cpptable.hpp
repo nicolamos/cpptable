@@ -85,10 +85,6 @@ public:
 
     constexpr auto names() const { return header.names(); }
 
-    operator[](std::size_t i) {
-        using column_type
-    }
-
 private:
     container_type rows_;
 };

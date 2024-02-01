@@ -1,6 +1,7 @@
 #include <iostream>
 #include <tuple>
 #include <algorithm>
+#include <ranges>
 #include <fmt/core.h>
 #include <fmt/ranges.h>
 #include <fmt/ostream.h>
