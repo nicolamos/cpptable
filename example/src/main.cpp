@@ -12,19 +12,6 @@
 using namespace mp_units;
 
 
-namespace tbl
-{
-
-template <Reference auto r, typename T>
-struct column_info<quantity<r, T>>
-{
-    using value_type = quantity<r, T>;
-    std::string name;
-};
-
-}
-
-
 template <Reference auto r, typename T>
 struct fmt::formatter<tbl::column_info<quantity<r, T>>> : fmt::formatter<std::pair<string_view, decltype(get_unit(r))>>
 {
