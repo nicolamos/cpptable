@@ -15,9 +15,9 @@ using namespace mp_units;
 template <Reference auto r, typename T>
 struct fmt::formatter<tbl::column_info<quantity<r, T>>> : fmt::formatter<std::pair<string_view, decltype(get_unit(r))>>
 {
-    using reference_type = decltype(get_unit(r));
+    using unit_type = decltype(get_unit(r));
     using Q = quantity<r, T>;
-    using super = fmt::formatter<std::pair<string_view, reference_type>>;
+    using super = fmt::formatter<std::pair<string_view, unit_type>>;
     using column_type = tbl::column_info<Q>;
     auto format(const column_type& cinfo, format_context& ctx) const
     {
