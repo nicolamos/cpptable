@@ -6,7 +6,10 @@
 #include <utility>
 #include <vector>
 #include <string>
+#include <string_view>
 #include <ranges>
+#include <fmt/core.h>
+#include <fmt/format.h>
 
 
 namespace tbl
@@ -29,23 +32,24 @@ struct column_info
 };
 
 
-template <typename T>
-auto format_as(const column_info<T>& cinfo) { return cinfo.name; }
-
-
 template <typename... Ts>
-class default_header
+struct default_header
 {
-public:
     using row_type = std::tuple<Ts...>;
     using column_type = std::tuple<column_info<Ts>...>;
 
-    //constexpr static auto size() { return std::tuple_size<row_type>{}; }
-    constexpr default_header(column_info<Ts>... cinfo) : columns_{cinfo...} {}
+    constexpr default_header(column_info<Ts>... cinfo) : columns{cinfo...} {}
 
-private:
-    column_type columns_;
+    constexpr auto names() const {
+        return std::apply([](const auto&... args) { return std::array<std::string, sizeof...(args)>{args.name...}; }, columns);
+    }
+
+    column_type columns;
 };
+
+
+template <typename... Ts>
+constexpr auto format_as(const default_header<Ts...>& header) { return header.columns; }
 
 
 template <
@@ -63,8 +67,10 @@ public:
     using iterator = typename container_type::iterator;
     using const_iterator = typename container_type::const_iterator;
 
+    header_type header;
+
     template <std::convertible_to<std::string> ...Ts>
-    constexpr basic_table(Ts&& ...names) : header_{{std::string(std::forward<Ts>(names))}...} {}
+    constexpr basic_table(Ts&& ...names) : header{{std::string(std::forward<Ts>(names))}...} {}
 
     constexpr const_iterator begin() const { return rows_.begin(); }
     constexpr iterator begin() { return rows_.begin(); }
@@ -74,8 +80,9 @@ public:
     template< class... Args >
     constexpr reference emplace_back(Args&&... args) { return rows_.emplace_back(std::forward<Args>(args)...); }
 
+    constexpr auto names() const { return header.names(); }
+
 private:
-    header_type header_;
     container_type rows_;
 };
 
@@ -90,5 +97,16 @@ struct table : public basic_table <default_header<Ts...>>
 };
 
 } // namespace tbl
+
+
+template <typename T>
+struct fmt::formatter<tbl::column_info<T>> : fmt::formatter<std::string_view>
+{
+    using column_type = tbl::column_info<T>;
+    auto format(const column_type& cinfo, format_context& ctx) const
+    {
+        return fmt::formatter<std::string_view>::format(cinfo.name, ctx);
+    }
+};
 
 #endif // CPPTABLE_HPP

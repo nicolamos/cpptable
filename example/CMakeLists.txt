@@ -1,9 +1,11 @@
 CPMAddPackage("gh:gsl-lite/gsl-lite#v0.41.0")
 
+set(MP_UNITS_USE_FMTLIB YES)
+
 FetchContent_Declare(
     mp-units
     GIT_REPOSITORY "https://github.com/mpusz/mp-units.git"
-    GIT_TAG v2.1.0
+    #GIT_TAG v2.1.0
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/mp-units
     BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/mp-units-build
 )
@@ -27,6 +29,7 @@ target_link_libraries(
     ${CPPTABLE_EXE_NAME}
 PUBLIC
     ${PROJECT_NAME}::${CPPTABLE_LIB_NAME}
+    fmt::fmt
     mp-units::mp-units
 )
 
