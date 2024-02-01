@@ -1,5 +1,6 @@
 #include <iostream>
 #include <tuple>
+#include <algorithm>
 #include <fmt/core.h>
 #include <fmt/ranges.h>
 #include <fmt/ostream.h>
@@ -41,6 +42,7 @@ struct qtable : public table<quantity<Rs>...>
 
 int main()
 {
+    namespace ranges = std::ranges;
     using si::unit_symbols::cm;
     using si::unit_symbols::s;
 
@@ -51,6 +53,13 @@ int main()
     table t = {"c1", "c2"};
 
     t.emplace_back(2, 3 * cm / s);
+    t.emplace_back(4, 4.0e-1 * cm / s);
+
+    ranges::for_each(
+        t,
+        [](const auto& c) { fmt::println("{}", c); },
+        [](const auto& row) { return std::get<1>(row); }
+    );
 
     for (auto const& row : t) {
         fmt::println("{}", row);
@@ -62,7 +71,6 @@ int main()
     qtable qt{"c1", "c2"};
 
     fmt::println("{}", qt.header);
-
 
     return 0;
 }

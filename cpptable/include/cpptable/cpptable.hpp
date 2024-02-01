@@ -37,7 +37,7 @@ struct default_header
     using row_type = std::tuple<Ts...>;
     using column_type = std::tuple<column_info<Ts>...>;
 
-    constexpr default_header(column_info<Ts>... cinfo) : columns{cinfo...} {}
+    constexpr default_header(column_info<Ts>... cinfo) : columns{std::move(cinfo)...} {}
 
     constexpr auto names() const {
         return std::apply([](const auto&... args) { return std::array<std::string, sizeof...(args)>{args.name...}; }, columns);
@@ -76,7 +76,7 @@ public:
     constexpr const_iterator end() const { return rows_.end(); }
     constexpr iterator end() { return rows_.end(); }
 
-    template< class... Args >
+    template<typename... Args>
     constexpr reference emplace_back(Args&&... args) { return rows_.emplace_back(std::forward<Args>(args)...); }
 
     constexpr auto names() const { return header.names(); }
