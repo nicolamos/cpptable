@@ -19,7 +19,6 @@ template <Reference auto r, typename T>
 struct column_info<quantity<r, T>>
 {
     using value_type = quantity<r, T>;
-    constexpr operator std::string() const { return fmt::format("({}, {})", name, std::string(unit_symbol(get_unit(r)))); }
     std::string name;
 };
 
