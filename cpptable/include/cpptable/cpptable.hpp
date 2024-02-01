@@ -87,9 +87,9 @@ private:
 
 
 template <typename... Ts>
-struct table : public basic_table <default_header<Ts...>>
+struct table : public basic_table<default_header<Ts...>>
 {
-    using super = basic_table <default_header<Ts...>>;
+    using super = basic_table<default_header<Ts...>>;
     using typename super::header_type;
     using typename super::row_type;
     using super::super;
