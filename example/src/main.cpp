@@ -55,6 +55,7 @@ constexpr auto format_as(const position<T>& pos) { return std::make_tuple(pos.x,
 int main()
 {
     namespace ranges = std::ranges;
+    namespace views = std::views;
     using si::unit_symbols::cm;
     using si::unit_symbols::s;
     using qpos = position<quantity<isq::length[si::metre]>>;
@@ -82,7 +83,7 @@ int main()
         fmt::println("{}", row);
     }
 
-    for (auto const& c : t | std::views::elements<1>) {
+    for (auto const& c : t | views::elements<1>) {
         fmt::println("{}", c);
     }
 
@@ -97,11 +98,13 @@ int main()
 
     fmt::println("{}", qt.header);
 
-    auto column = std::views::elements<1>(qt);
-    auto vec_col = std::views::elements<1>(qt) | ranges::to<std::vector>(); // C++23
+    auto column = views::elements<1>(qt);
+    auto vec_col = views::elements<1>(qt) | ranges::to<std::vector>(); // C++23
+    std::vector vec_col_2(std::from_range, views::elements<0>(qt)); // C++17 class template argument deduction
 
     fmt::println("column 1: {}", column);
     fmt::println("vector column 1: {}", vec_col);
+    fmt::println("vector column 0: {}", vec_col_2);
 
     using speed_t = quantity<isq::speed[cm/s], double>;
     using vec_col_t = std::vector<speed_t>;
@@ -113,7 +116,7 @@ int main()
 
     rt.header = {"name", "speed"};
 
-    fmt::println("speed: {}", std::views::elements<1>(rt));
+    fmt::println("speed: {}", views::elements<1>(rt));
 
     return 0;
 }
