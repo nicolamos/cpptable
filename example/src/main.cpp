@@ -89,9 +89,7 @@ int main()
     fmt::println("{}", t.header);
 
     using qtable = tbl::qtable<isq::length[cm], isq::time[si::second]>;
-    qtable qt{
-        {2*cm, 3 * s}
-    };
+    qtable qt = { {2*cm, 3 * s} };
 
     qt.header = {"c1", "c2"};
 
