@@ -5,6 +5,7 @@
 #include <fmt/core.h>
 #include <fmt/ranges.h>
 #include <fmt/ostream.h>
+#include <fmt/format.h>
 #include <mp-units/format.h>
 #include <mp-units/ostream.h>
 #include <mp-units/systems/si/si.h>
