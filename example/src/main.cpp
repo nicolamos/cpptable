@@ -41,24 +41,36 @@ struct qtable : public table<quantity<Rs>...>
 }
 
 
+template <typename T>
+struct position
+{
+    T x{}, y{}, z{};
+};
+
+
+template <typename T>
+constexpr auto format_as(const position<T>& pos) { return std::make_tuple(pos.x, pos.y, pos.z); }
+
+
 int main()
 {
     namespace ranges = std::ranges;
     using si::unit_symbols::cm;
     using si::unit_symbols::s;
+    using qpos = position<quantity<isq::length[si::metre]>>;
 
     std::cout << fmt::format("{}\n", 34 * cm);
 
-    using table = tbl::table<int, quantity<isq::speed[cm / s], float>>;
+    using table = tbl::table<qpos, quantity<isq::speed[cm / s], float>>;
 
     table t{
-        {2, 3 * cm / s},
-        {4, 4.0e-1 * cm / s}
+        {{2 * cm, 1*cm, -2*cm}, 3 * cm / s},
+        {{4 * cm, 100*cm, 0.3*cm}, 4.0e-1 * cm / s}
     };
 
     t.header = {"c1", "c2"};
 
-    t.emplace_back(5, 3 * si::metre / s);
+    t.emplace_back(qpos{5 * cm, 2*cm, 20*cm}, 3 * si::metre / s);
 
     ranges::for_each(
         t,

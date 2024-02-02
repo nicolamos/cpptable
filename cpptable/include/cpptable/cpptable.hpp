@@ -16,15 +16,6 @@ namespace tbl
 {
 
 template <typename T>
-struct position
-{
-    T x;
-    T y;
-    T z;
-};
-
-
-template <typename T>
 struct column_info
 {
     using value_type = T;
