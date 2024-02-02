@@ -51,10 +51,14 @@ int main()
 
     using table = tbl::table<int, quantity<isq::speed[cm / s], float>>;
 
-    table t = {"c1", "c2"};
+    table t{
+        {2, 3 * cm / s},
+        {4, 4.0e-1 * cm / s}
+    };
 
-    t.emplace_back(2, 3 * cm / s);
-    t.emplace_back(4, 4.0e-1 * cm / s);
+    t.header = {"c1", "c2"};
+
+    t.emplace_back(5, 3 * si::metre / s);
 
     ranges::for_each(
         t,
@@ -66,12 +70,38 @@ int main()
         fmt::println("{}", row);
     }
 
+    for (auto const& c : t | std::views::elements<1>) {
+        fmt::println("{}", c);
+    }
+
     fmt::println("{}", t.header);
 
     using qtable = tbl::qtable<isq::length[cm], isq::time[si::second]>;
-    qtable qt{"c1", "c2"};
+    qtable qt{
+        {2*cm, 3 * s}
+    };
+
+    qt.header = {"c1", "c2"};
+
+    qt.emplace_back(0.5*cm, 3.2 * s);
 
     fmt::println("{}", qt.header);
+
+    auto column = std::views::elements<1>(qt);
+
+    fmt::println("column 1: {}", column);
+
+    using speed_t = quantity<isq::speed[cm/s], double>;
+    using vec_col_t = std::vector<speed_t>;
+    using ragged_table = tbl::table<std::string, vec_col_t>;
+    ragged_table rt{
+        {"pippo", {2*cm/s, 4.5*cm/s}},
+        {"pluto", { 4.1*si::metre / s}}
+    };
+
+    rt.header = {"name", "speed"};
+
+    fmt::println("speed: {}", std::views::elements<1>(rt));
 
     return 0;
 }

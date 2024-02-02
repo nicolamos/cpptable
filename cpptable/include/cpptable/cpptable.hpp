@@ -4,6 +4,7 @@
 
 #include <concepts>
 #include <utility>
+#include <initializer_list>
 #include <vector>
 #include <string>
 #include <string_view>
@@ -27,6 +28,9 @@ template <typename T>
 struct column_info
 {
     using value_type = T;
+    constexpr column_info() = default;
+    template <std::convertible_to<std::string> NameT>
+    constexpr column_info(NameT name) : name{std::move(name)} {}
     std::string name;
 };
 
@@ -37,6 +41,7 @@ struct default_header
     using row_type = std::tuple<Ts...>;
     using column_tuple = std::tuple<column_info<Ts>...>;
 
+    constexpr default_header() = default;
     constexpr default_header(column_info<Ts>... cinfo) : columns{std::move(cinfo)...} {}
 
     constexpr auto names() const {
@@ -72,8 +77,9 @@ public:
 
     header_type header;
 
-    template <std::convertible_to<std::string> ...Ts>
-    constexpr basic_table(Ts&& ...names) : header{{std::string(std::forward<Ts>(names))}...} {}
+    // template <std::convertible_to<std::string> ...Ts>
+    // constexpr basic_table(Ts&& ...names) : header{{std::string(std::forward<Ts>(names))}...} {}
+    constexpr basic_table(std::initializer_list<row_type> init) : rows_{std::move(init)} {}
 
     constexpr const_iterator begin() const { return rows_.begin(); }
     constexpr iterator begin() { return rows_.begin(); }
