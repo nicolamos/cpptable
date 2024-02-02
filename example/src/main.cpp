@@ -98,8 +98,10 @@ int main()
     fmt::println("{}", qt.header);
 
     auto column = std::views::elements<1>(qt);
+    auto vec_col = std::views::elements<1>(qt) | ranges::to<std::vector>(); // C++23
 
     fmt::println("column 1: {}", column);
+    fmt::println("vector column 1: {}", vec_col);
 
     using speed_t = quantity<isq::speed[cm/s], double>;
     using vec_col_t = std::vector<speed_t>;
