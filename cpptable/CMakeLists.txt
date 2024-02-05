@@ -1,33 +1,18 @@
 set(CPPTABLE_LIB_NAME cpptable CACHE INTERNAL "cpptable library name")
 
-set(
-    ${CPPTABLE_LIB_NAME}_SOURCES
-    src/cpptable.cpp
+add_library(
+    ${CPPTABLE_LIB_NAME} INTERFACE
+    include/cpptable/cpptable.hpp
+    include/cpptable/format.hpp
 )
-
-
-add_library(${CPPTABLE_LIB_NAME} SHARED ${${CPPTABLE_LIB_NAME}_SOURCES})
 add_library(${PROJECT_NAME}::${CPPTABLE_LIB_NAME} ALIAS ${CPPTABLE_LIB_NAME})
 
 target_include_directories(
     ${CPPTABLE_LIB_NAME}
-    PUBLIC
+    INTERFACE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}>
         $<INSTALL_INTERFACE:include>
-)
-
-target_link_libraries(
-    ${CPPTABLE_LIB_NAME}
-    PUBLIC
-        fmt::fmt
-        # mp-units::mp-units
-)
-
-target_compile_options(
-    ${CPPTABLE_LIB_NAME}
-PRIVATE
-    ${CPPTABLE_WARNING_FLAGS}
 )
 
 set_target_properties(
@@ -82,8 +67,3 @@ install(
         PATTERN "*.ipp"
         PATTERN "*.h"
 )
-
-# install(
-#     FILES ${PROJECT_BINARY_DIR}/${CPPTABLE_CONFIG_FILE}
-#     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${CPPTABLE_LIB_NAME}
-# )

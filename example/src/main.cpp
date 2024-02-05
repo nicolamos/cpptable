@@ -11,6 +11,7 @@
 #include <mp-units/systems/si/si.h>
 
 #include "cpptable/cpptable.hpp"
+#include "cpptable/format.hpp"
 
 using namespace mp_units;
 

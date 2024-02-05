@@ -9,7 +9,6 @@
 #include <string>
 #include <string_view>
 #include <ranges>
-#include <fmt/format.h>
 
 
 namespace tbl
@@ -97,16 +96,5 @@ struct table : public basic_table<default_header<Ts...>>
 };
 
 } // namespace tbl
-
-
-template <typename T>
-struct fmt::formatter<tbl::column_info<T>> : fmt::formatter<std::string_view>
-{
-    using column_type = tbl::column_info<T>;
-    auto format(const column_type& cinfo, format_context& ctx) const
-    {
-        return fmt::formatter<std::string_view>::format(cinfo.name, ctx);
-    }
-};
 
 #endif // CPPTABLE_HPP

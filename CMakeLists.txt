@@ -31,8 +31,6 @@ if("${isSystemDir}" STREQUAL "-1")
    set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
 endif()
 
-CPMAddPackage("gh:fmtlib/fmt#10.2.1")
-
 message(STATUS "Configuration of cpptable library")
 add_subdirectory(cpptable)
 

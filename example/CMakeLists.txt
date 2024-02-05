@@ -1,3 +1,4 @@
+CPMAddPackage("gh:fmtlib/fmt#10.2.1")
 CPMAddPackage("gh:gsl-lite/gsl-lite#v0.41.0")
 
 set(MP_UNITS_USE_FMTLIB YES)
