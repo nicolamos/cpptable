@@ -5,6 +5,15 @@
 #include <fmt/format.h>
 #include "cpptable.hpp"
 
+namespace tbl
+{
+
+template <typename... Ts>
+constexpr auto format_as(const default_header<Ts...> &header) { return header.columns; }
+
+}
+
+
 template <typename T>
 struct fmt::formatter<tbl::column_info<T>> : fmt::formatter<std::string_view>
 {

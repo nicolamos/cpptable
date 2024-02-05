@@ -61,10 +61,6 @@ private:
 };
 
 
-template <typename... Ts>
-constexpr auto format_as(const default_header<Ts...>& header) { return header.columns; }
-
-
 template <
     typename HeaderT,
     typename ContainerT = std::vector<typename HeaderT::row_type>
