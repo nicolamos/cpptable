@@ -25,6 +25,13 @@ struct column_info
 };
 
 
+template <typename Tuple>
+struct to_string_tuple
+{
+    std::tuple<>
+};
+
+
 template <typename... Ts>
 struct default_header
 {
@@ -43,7 +50,14 @@ struct default_header
     template <std::size_t I>
     using column_t = typename column<I>::type;
 
+    // column_tuple columns{default_column_names()};
     column_tuple columns;
+
+private:
+    static constexpr auto default_column_names() -> column_tuple
+    {
+        return to_string_tuple<std::index_sequence_for<Ts...>{}>{};
+    }
 };
 
 
@@ -60,6 +74,7 @@ class basic_table
 public:
     using header_type = HeaderT;
     using row_type = typename header_type::row_type;
+    using column_tuple = typename header_type::column_tuple;
     using container_type = ContainerT;
     using reference = typename container_type::reference;
     using iterator = typename container_type::iterator;
@@ -92,6 +107,7 @@ struct table : public basic_table<default_header<Ts...>>
     using super = basic_table<default_header<Ts...>>;
     using typename super::header_type;
     using typename super::row_type;
+    using typename super::column_tuple;
     using super::super;
 };
 

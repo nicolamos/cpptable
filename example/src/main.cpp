@@ -120,5 +120,14 @@ int main()
 
     fmt::println("speed: {}", views::elements<1>(rt));
 
+    // Simple join operation of table A and table B (same number of rows)
+    // using tableA = tbl::table<std::string, int>;
+    // using tableB = tbl::table<float, float>;
+
+    // table
+
+    // constexpr auto N = std::tuple_size_v<tableA::column_tuple>;
+    fmt::println("{}", tbl::to_string<1, 2>());
+
     return 0;
 }
