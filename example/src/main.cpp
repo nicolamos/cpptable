@@ -109,6 +109,9 @@ int main()
     // fmt::println("vector column 1: {}", vec_col);
     // fmt::println("vector column 0: {}", vec_col_2);
 
+    // if we don't have ranges::to, use the old iterator constructor of std::vector
+    std::vector vec_from_range
+
     using speed_t = quantity<isq::speed[cm/s], double>;
     using vec_col_t = std::vector<speed_t>;
     using ragged_table = tbl::table<std::string, vec_col_t>;
