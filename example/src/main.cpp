@@ -120,14 +120,18 @@ int main()
 
     fmt::println("speed: {}", views::elements<1>(rt));
 
-    // Simple join operation of table A and table B (same number of rows)
-    // using tableA = tbl::table<std::string, int>;
-    // using tableB = tbl::table<float, float>;
+    // Simple join operation of table A and table B (number of rows is the minimum between the size of two tables)
+    auto tA = tbl::make_table<std::string, int>("C0", "C1");
+    auto tB = tbl::make_table<float, float>("B0", "B1");
 
-    // table
+    tA.emplace_back("ciao", 1);
+    tA.emplace_back("ciao1", 2);
+    tB.emplace_back(0.1, 0.3);
+    tB.emplace_back(0.5, 0.7);
 
-    // constexpr auto N = std::tuple_size_v<tableA::column_tuple>;
-    fmt::println("{}", tbl::to_string<1, 2>());
+    auto tjoin = tbl::table_join(tA, tB);
+
+    fmt::println("{}", tjoin);
 
     return 0;
 }
