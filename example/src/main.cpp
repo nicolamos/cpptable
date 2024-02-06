@@ -61,31 +61,41 @@ int main()
     namespace views = std::views;
     using si::unit_symbols::cm;
     using si::unit_symbols::s;
+
+    //Let's define a 3D position object that holds quantities (in metres)
     using qpos = position<quantity<isq::length[si::metre]>>;
 
     std::cout << fmt::format("{}\n", 34 * cm);
 
+    // We use an alias type for conveniency
+    // Define a table with 2 columns: (position(double), speed(float))
     using table = tbl::table<qpos, quantity<isq::speed[cm / s], float>>;
 
+    // Define table t and fill with 2 rows
     table t{
         {{2 * cm, 1*cm, -2*cm}, 3 * cm / s},
         {{4 * cm, 100*cm, 0.3*cm}, 4.0e-1 * cm / s}
     };
 
+    // Add column names
     t.header = {"c1", "c2"};
 
+    // Let's add one more row
     t.emplace_back(qpos{5 * cm, 2*cm, 20*cm}, 3 * si::metre / s);
 
+    // print second column t
     ranges::for_each(
         t,
         [](const auto& c) { fmt::println("{}", c); },
         [](const auto& row) { return std::get<1>(row); }
     );
 
+    // print all rows
     for (auto const& row : t) {
         fmt::println("{}", row);
     }
 
+    // another way to print second column using C++20 ranges
     for (auto const& c : t | views::elements<1>) {
         fmt::println("{}", c);
     }
@@ -110,8 +120,11 @@ int main()
     // fmt::println("vector column 0: {}", vec_col_2);
 
     // if we don't have ranges::to, use the old iterator constructor of std::vector
-    std::vector vec_from_range
+    std::vector vec_from_range(column.begin(), column.end());
 
+    fmt::println("vector from range: {}", vec_from_range);
+
+    // Define a table holding vector of speed quantities
     using speed_t = quantity<isq::speed[cm/s], double>;
     using vec_col_t = std::vector<speed_t>;
     using ragged_table = tbl::table<std::string, vec_col_t>;
