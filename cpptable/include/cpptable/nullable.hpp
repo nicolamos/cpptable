@@ -32,9 +32,9 @@ constexpr auto make_table(nullable_t, column_info<Ts> const& ...cinfo) -> nullab
 
 
 template <typename ...Ts, typename ContainerT = typename nullable_table<Ts...>::container_type>
-constexpr auto make_table(nullable_t, std::array<std::string, sizeof...(Ts)> names, ContainerT rows) -> std::enable_if_t<std::is_same_v<ContainerT, typename nullable_table<Ts...>::container_type>, nullable_table<Ts...>>
+constexpr auto make_table(nullable_t, std::array<std::string, sizeof...(Ts)> names, ContainerT&& rows) -> nullable_table<Ts...>
 {
-    return { names, std::move(rows) };
+    return { names, std::forward<ContainerT>(rows) };
 }
 
 } // namespace tbl

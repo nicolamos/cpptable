@@ -143,9 +143,9 @@ constexpr auto make_table(column_info<Ts> const& ...cinfo) -> table<Ts...>
 
 
 template <typename ...Ts, typename ContainerT = typename table<Ts...>::container_type>
-constexpr auto make_table(std::array<std::string, sizeof...(Ts)> names, ContainerT rows) -> std::enable_if_t<std::is_same_v<ContainerT, typename table<Ts...>::container_type>, table<Ts...>>
+constexpr auto make_table(std::array<std::string, sizeof...(Ts)> names, ContainerT&& rows) -> table<Ts...>
 {
-    return {names, std::move(rows)};
+    return {names, std::forward<ContainerT>(rows)};
 }
 
 
