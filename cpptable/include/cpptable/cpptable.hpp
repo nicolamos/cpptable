@@ -100,6 +100,12 @@ public:
     constexpr const_iterator end() const { return rows_.end(); }
     constexpr iterator end() { return rows_.end(); }
 
+    constexpr const_reference at(size_type pos) const { return rows_.at(pos); }
+    constexpr reference at(size_type pos) { return rows_.at(pos); }
+    constexpr reference operator[](size_type pos) { return rows_[pos]; }
+    constexpr const_reference operator[](size_type pos) const { return rows_[pos]; }
+
+    [[nodiscard]] constexpr bool empty() const noexcept { return rows.empty(); }
     constexpr auto capacity() const { return rows_.capacity(); }
     constexpr auto size() const { return rows_.size(); }
     constexpr void reserve(size_type new_cap) { rows_.reserve(new_cap); }
