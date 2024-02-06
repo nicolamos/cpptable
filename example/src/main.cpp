@@ -102,12 +102,12 @@ int main()
     fmt::println("{}", qt.header);
 
     auto column = views::elements<1>(qt);
-    auto vec_col = views::elements<1>(qt) | ranges::to<std::vector>(); // C++23
-    std::vector vec_col_2(std::from_range, views::elements<0>(qt)); // C++17 class template argument deduction
+    // auto vec_col = views::elements<1>(qt) | ranges::to<std::vector>(); // C++23
+    // std::vector vec_col_2(std::from_range, views::elements<0>(qt)); // C++17 class template argument deduction
 
     fmt::println("column 1: {}", column);
-    fmt::println("vector column 1: {}", vec_col);
-    fmt::println("vector column 0: {}", vec_col_2);
+    // fmt::println("vector column 1: {}", vec_col);
+    // fmt::println("vector column 0: {}", vec_col_2);
 
     using speed_t = quantity<isq::speed[cm/s], double>;
     using vec_col_t = std::vector<speed_t>;

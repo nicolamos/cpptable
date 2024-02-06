@@ -159,7 +159,7 @@ auto table_join(Tables&& ...tables)
 
     joined_table.reserve(std::min({tables.size()...}));
 
-    for (const auto& values : zip(tables...)) {
+    for (auto const& values : zip(tables...)) {
         auto new_row = std::apply([](auto const& ...args) { return std::tuple_cat(args...); }, values);
         joined_table.push_back(new_row);
     }
