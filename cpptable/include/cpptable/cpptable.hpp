@@ -4,25 +4,25 @@
 
 #include <concepts>
 #include <utility>
-#include <algorithm>
 #include <initializer_list>
-#include <vector>
 #include <string>
-#include <string_view>
+#include <vector>
 #include <ranges>
+#include <algorithm>
 
 
 namespace tbl
 {
 
-template <typename T>
+template <typename T, typename StringT = std::string>
 struct column_info
 {
     using value_type = T;
+    using string_type = StringT;
     constexpr column_info() = default;
-    template <std::convertible_to<std::string> NameT>
+    template <std::convertible_to<string_type> NameT>
     constexpr column_info(NameT name) : name{std::move(name)} {}
-    std::string name;
+    string_type name;
 };
 
 
@@ -117,7 +117,7 @@ private:
 };
 
 
-template <typename... Ts>
+template <typename ...Ts>
 struct table : public basic_table<default_header<Ts...>>
 {
     using super = basic_table<default_header<Ts...>>;

@@ -4,6 +4,8 @@ add_library(
     ${CPPTABLE_LIB_NAME} INTERFACE
     include/cpptable/cpptable.hpp
     include/cpptable/format.hpp
+    include/cpptable/nullable.hpp
+    include/cpptable/utils.hpp
 )
 add_library(${PROJECT_NAME}::${CPPTABLE_LIB_NAME} ALIAS ${CPPTABLE_LIB_NAME})
 

@@ -2,6 +2,7 @@
 #include <tuple>
 #include <algorithm>
 #include <ranges>
+#include <optional>
 #include <fmt/core.h>
 #include <fmt/ranges.h>
 #include <fmt/ostream.h>
@@ -130,6 +131,12 @@ int main()
     auto tjoin = tbl::table_join(tA, tB);
 
     fmt::println("{}", tjoin);
+
+    // Missing values
+    using nullable_table = tbl::nullable_table<std::string, int>;
+    auto nt = nullable_table({"C0", "C1"}, {{"CIAO", std::nullopt}});
+
+    fmt::println("{}", nt);
 
     return 0;
 }
