@@ -82,6 +82,7 @@ public:
     using container_type = ContainerT;
     using size_type = typename container_type::size_type;
     using reference = typename container_type::reference;
+    using const_reference = typename container_type::const_reference;
     using iterator = typename container_type::iterator;
     using const_iterator = typename container_type::const_iterator;
 
@@ -105,7 +106,7 @@ public:
     constexpr reference operator[](size_type pos) { return rows_[pos]; }
     constexpr const_reference operator[](size_type pos) const { return rows_[pos]; }
 
-    [[nodiscard]] constexpr bool empty() const noexcept { return rows.empty(); }
+    [[nodiscard]] constexpr bool empty() const noexcept { return rows_.empty(); }
     constexpr auto capacity() const { return rows_.capacity(); }
     constexpr auto size() const { return rows_.size(); }
     constexpr void reserve(size_type new_cap) { rows_.reserve(new_cap); }

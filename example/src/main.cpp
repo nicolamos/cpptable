@@ -138,5 +138,9 @@ int main()
 
     fmt::println("{}", nt);
 
+    // Show that table type is mutable
+    std::get<1>(tA[0]) = 10;
+    fmt::println("{}", tA);
+
     return 0;
 }
