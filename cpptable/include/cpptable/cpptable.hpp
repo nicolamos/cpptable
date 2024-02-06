@@ -26,31 +26,31 @@ struct column_info
 };
 
 
-template <std::size_t... Is>
+template <std::size_t ...Is>
 constexpr auto to_string_tuple(std::index_sequence<Is...>)
 {
     return std::make_tuple(std::to_string(Is)...);
 }
 
 
-template <typename... Ts>
+template <typename ...Ts>
 constexpr auto to_string_tuple()
 {
     return to_string_tuple(std::index_sequence_for<Ts...>{});
 }
 
 
-template <typename... Ts>
+template <typename ...Ts>
 struct default_header
 {
     using row_type = std::tuple<Ts...>;
     using column_tuple = std::tuple<column_info<Ts>...>;
 
     constexpr default_header() = default;
-    constexpr default_header(column_info<Ts>... cinfo) : columns{std::move(cinfo)...} {}
+    constexpr default_header(column_info<Ts> ...cinfo) : columns{std::move(cinfo)...} {}
 
     constexpr auto names() const {
-        return std::apply([](const auto&... args) { return std::array<std::string, sizeof...(args)>{args.name...}; }, columns);
+        return std::apply([](auto const& ...args) { return std::array<std::string, sizeof...(args)>{args.name...}; }, columns);
     }
 
     template <std::size_t I>
@@ -63,7 +63,7 @@ struct default_header
 
 
 template <typename ...Ts>
-constexpr auto make_header(column_info<Ts>&&... cinfo)
+constexpr auto make_header(column_info<Ts>&& ...cinfo)
 {
     return default_header<Ts...>(std::forward<column_info<Ts>>(cinfo)...);
 }
@@ -91,9 +91,9 @@ public:
     constexpr basic_table(std::initializer_list<row_type> init) : rows_{std::move(init)} {}
     template <std::convertible_to<std::string> ...Names>
     constexpr basic_table(Names&& ...names) : header{{std::string(std::forward<Names>(names))}...} {}
-    constexpr basic_table(std::array<std::string, std::tuple_size_v<column_tuple>> names, container_type rows) : header{std::apply([](auto const&... args) { return header_type{args...}; }, names)}, rows_{std::move(rows)} {}
+    constexpr basic_table(std::array<std::string, std::tuple_size_v<column_tuple>> names, container_type rows) : header{std::apply([](auto const& ...args) { return header_type{args...}; }, names)}, rows_{std::move(rows)} {}
     template <typename ...Ts>
-    constexpr basic_table(column_info<Ts> const&... cinfo) : header{cinfo...} {}
+    constexpr basic_table(column_info<Ts> const& ...cinfo) : header{cinfo...} {}
 
     constexpr const_iterator begin() const { return rows_.begin(); }
     constexpr iterator begin() { return rows_.begin(); }
@@ -104,8 +104,8 @@ public:
     constexpr auto size() const { return rows_.size(); }
     constexpr void reserve(size_type new_cap) { rows_.reserve(new_cap); }
 
-    template<typename... Args>
-    constexpr reference emplace_back(Args&&... args) { return rows_.emplace_back(std::forward<Args>(args)...); }
+    template<typename ...Args>
+    constexpr reference emplace_back(Args&& ...args) { return rows_.emplace_back(std::forward<Args>(args)...); }
 
     template <typename T>
     constexpr void push_back(T&& value) { rows_.push_back(std::forward<T>(value)); }
@@ -135,17 +135,19 @@ constexpr auto make_table(Names&& ...names) -> table<Ts...>
 }
 
 
-template <typename... Ts>
+template <typename ...Ts>
 constexpr auto make_table(column_info<Ts> const& ...cinfo) -> table<Ts...>
 {
     return {cinfo...};
 }
 
-template <typename... Ts, typename ContainerT = typename table<Ts...>::container_type>
-constexpr auto make_table(std::array<std::string, sizeof...(Ts)> names, ContainerT&& rows) -> std::enable_if_t<std::is_same_v<ContainerT, typename table<Ts...>::container_type>, table<Ts...>>
+
+template <typename ...Ts, typename ContainerT = typename table<Ts...>::container_type>
+constexpr auto make_table(std::array<std::string, sizeof...(Ts)> names, ContainerT rows) -> std::enable_if_t<std::is_same_v<ContainerT, typename table<Ts...>::container_type>, table<Ts...>>
 {
-    return {names, std::forward<ContainerT>(rows)};
+    return {names, std::move(rows)};
 }
+
 
 template <typename ...Tables>
 auto table_join(Tables&& ...tables)
@@ -153,12 +155,12 @@ auto table_join(Tables&& ...tables)
     using std::views::zip;
 
     auto columns = std::tuple_cat(tables.header.columns...);
-    auto joined_table = std::apply([](auto const&... args) { return table<typename std::decay_t<decltype(args)>::value_type...>{args...}; }, columns);
+    auto joined_table = std::apply([](auto const& ...args) { return table<typename std::decay_t<decltype(args)>::value_type...>{args...}; }, columns);
 
     joined_table.reserve(std::min({tables.size()...}));
 
     for (const auto& values : zip(tables...)) {
-        auto new_row = std::apply([](const auto&... args) { return std::tuple_cat(args...); }, values);
+        auto new_row = std::apply([](auto const& ...args) { return std::tuple_cat(args...); }, values);
         joined_table.push_back(new_row);
     }
 

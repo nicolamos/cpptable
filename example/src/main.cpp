@@ -133,8 +133,8 @@ int main()
     fmt::println("{}", tjoin);
 
     // Missing values
-    using nullable_table = tbl::nullable_table<std::string, int>;
-    auto nt = nullable_table({"C0", "C1"}, {{"CIAO", std::nullopt}});
+    // using nullable_table = tbl::nullable_table<std::string, int>;
+    auto nt = tbl::make_table<std::string, int>(tbl::nullable, { "C0", "C1" }, { {"CIAO", std::nullopt} });
 
     fmt::println("{}", nt);
 
