@@ -121,11 +121,9 @@ int main()
     fmt::println("speed: {}", views::elements<1>(rt));
 
     // Simple join operation of table A and table B (number of rows is the minimum between the size of two tables)
-    auto tA = tbl::make_table<std::string, int>("C0", "C1");
+    auto tA = tbl::make_table<std::string, int>({"C0", "C1"}, {{"ciao", 1}, {"ciao1", 2}});
     auto tB = tbl::make_table<float, float>("B0", "B1");
 
-    tA.emplace_back("ciao", 1);
-    tA.emplace_back("ciao1", 2);
     tB.emplace_back(0.1, 0.3);
     tB.emplace_back(0.5, 0.7);
 

@@ -91,6 +91,7 @@ public:
     constexpr basic_table(std::initializer_list<row_type> init) : rows_{std::move(init)} {}
     template <std::convertible_to<std::string> ...Names>
     constexpr basic_table(Names&& ...names) : header{{std::string(std::forward<Names>(names))}...} {}
+    constexpr basic_table(std::array<std::string, std::tuple_size_v<column_tuple>> names, container_type rows) : header{std::apply([](auto const&... args) { return header_type{args...}; }, names)}, rows_{std::move(rows)} {}
     template <typename ...Ts>
     constexpr basic_table(column_info<Ts> const&... cinfo) : header{cinfo...} {}
 
@@ -140,6 +141,11 @@ constexpr auto make_table(column_info<Ts> const& ...cinfo) -> table<Ts...>
     return {cinfo...};
 }
 
+template <typename... Ts, typename ContainerT = typename table<Ts...>::container_type>
+constexpr auto make_table(std::array<std::string, sizeof...(Ts)> names, ContainerT&& rows) -> std::enable_if_t<std::is_same_v<ContainerT, typename table<Ts...>::container_type>, table<Ts...>>
+{
+    return {names, std::forward<ContainerT>(rows)};
+}
 
 template <typename ...Tables>
 auto table_join(Tables&& ...tables)
