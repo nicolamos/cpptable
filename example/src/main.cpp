@@ -138,25 +138,28 @@ int main()
     fmt::println("speed: {}", views::elements<1>(rt));
 
     // Simple join operation of table A and table B (number of rows is the minimum between the size of two tables)
-    auto tA = tbl::make_table<std::string, int>({"C0", "C1"}, {{"ciao", 1}, {"ciao1", 2}});
+    auto tA = tbl::make_table<std::string, int>("C0", "C1", {{"ciao", 1}, {"ciao1", 2}});
     auto tB = tbl::make_table<float, float>("B0", "B1");
 
     tB.emplace_back(0.1, 0.3);
     tB.emplace_back(0.5, 0.7);
 
-    auto tjoin = tbl::table_join(tA, tB);
+    // auto tjoin = tbl::table_join(tA, tB);
 
-    fmt::println("{}", tjoin);
+    // fmt::println("{}", tjoin);
 
     // Missing values
     // using nullable_table = tbl::nullable_table<std::string, int>;
-    auto nt = tbl::make_table<std::string, int>(tbl::nullable, { "C0", "C1" }, { {"CIAO", std::nullopt} });
+    auto nt = tbl::make_table<std::string, int>(tbl::nullable, "C0", "C1", { {"CIAO", std::nullopt} });
+    auto nt2 = tbl::make_table<std::string, int>(tbl::nullable, "C0", "C1");
 
     fmt::println("{}", nt);
 
     // Show that table type is mutable
     std::get<1>(tA[0]) = 10;
     fmt::println("{}", tA);
+
+    fmt::println("{}", tA.header.size());
 
     return 0;
 }

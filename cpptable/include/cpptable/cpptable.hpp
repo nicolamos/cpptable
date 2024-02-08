@@ -3,6 +3,7 @@
 #define CPPTABLE_HPP
 
 #include <concepts>
+#include <type_traits>
 #include <utility>
 #include <initializer_list>
 #include <string>
@@ -13,6 +14,19 @@
 
 namespace tbl
 {
+
+namespace detail
+{
+
+// template <typename ...TablesT>
+// struct table_join_value_types
+// {
+
+// using type = std::tuple<TablesT::header_type>
+
+// };
+
+}
 
 template <typename T, typename StringT = std::string>
 struct column_info
@@ -45,6 +59,7 @@ struct default_header
 {
     using row_type = std::tuple<Ts...>;
     using column_tuple = std::tuple<column_info<Ts>...>;
+    using header_size_t = std::tuple_size<row_type>;
 
     constexpr default_header() = default;
     constexpr default_header(column_info<Ts> ...cinfo) : columns{std::move(cinfo)...} {}
@@ -58,6 +73,8 @@ struct default_header
     template <std::size_t I>
     using column_t = typename column<I>::type;
 
+
+    static constexpr header_size_t size{};
     column_tuple columns{to_string_tuple<Ts...>()};
 };
 
@@ -90,11 +107,12 @@ public:
 
     constexpr basic_table() = default;
     constexpr basic_table(std::initializer_list<row_type> init) : rows_{std::move(init)} {}
-    template <std::convertible_to<std::string> ...Names>
-    constexpr basic_table(Names&& ...names) : header{{std::string(std::forward<Names>(names))}...} {}
-    constexpr basic_table(std::array<std::string, std::tuple_size_v<column_tuple>> names, container_type rows) : header{std::apply([](auto const& ...args) { return header_type{args...}; }, names)}, rows_{std::move(rows)} {}
-    template <typename ...Ts>
-    constexpr basic_table(column_info<Ts> const& ...cinfo) : header{cinfo...} {}
+    // template <std::convertible_to<std::string> ...Names>
+    // constexpr basic_table(Names&& ...names) : header{{std::string(std::forward<Names>(names))}...} {}
+    template <typename ...Ts, typename C = container_type>
+    constexpr basic_table(column_info<Ts> ...cinfo, C&& rows) : header{std::move(cinfo)...}, rows_{std::forward<ContainerT>(rows)} {}
+    // template <typename ...Ts>
+    // constexpr basic_table(column_info<Ts>&& ...cinfo) : header{std::move(cinfo)...} {}
 
     constexpr const_iterator begin() const { return rows_.begin(); }
     constexpr iterator begin() { return rows_.begin(); }
@@ -135,34 +153,44 @@ struct table : public basic_table<default_header<Ts...>>
 };
 
 
-template <typename ...Ts, std::convertible_to<std::string> ...Names>
-constexpr auto make_table(Names&& ...names) -> table<Ts...>
-{
-    return {names...};
-}
+// template <typename ...Ts, std::convertible_to<std::string> ...Names>
+// constexpr auto make_table(Names&& ...names) -> table<Ts...>
+// {
+//     return {std::forward<Names>(names)...};
+// }
 
 
-template <typename ...Ts>
-constexpr auto make_table(column_info<Ts> const& ...cinfo) -> table<Ts...>
-{
-    return {cinfo...};
-}
+// template <typename ...Ts>
+// constexpr auto make_table(column_info<Ts> ...cinfo) -> table<Ts...>
+// {
+//     return {std::move(cinfo)...};
+// }
 
 
 template <typename ...Ts, typename ContainerT = typename table<Ts...>::container_type>
-constexpr auto make_table(std::array<std::string, sizeof...(Ts)> names, ContainerT&& rows) -> table<Ts...>
+constexpr auto make_table(column_info<Ts> ...cinfo, ContainerT&& rows = {}) -> table<Ts...>
 {
-    return {names, std::forward<ContainerT>(rows)};
+    return table<Ts...>(std::move(cinfo)..., std::forward<ContainerT>(rows));
 }
 
 
-template <typename ...Tables>
+template <template <typename...> typename TableT = table, typename ...Tables>
 auto table_join(Tables&& ...tables)
 {
     using std::views::zip;
 
     auto columns = std::tuple_cat(tables.header.columns...);
-    auto joined_table = std::apply([](auto const& ...args) { return table<typename std::decay_t<decltype(args)>::value_type...>{args...}; }, columns);
+
+    // using table_t = TableT<typename decltype(tables.header.columns)::value_type...>;
+    auto joined_table = std::apply(
+        [](auto ...args) {
+            return table<typename std::decay_t<decltype(tables.header.columns)>::value_type...>(
+                std::move(args)...
+            );
+        },
+        columns
+    );
+    // auto joined_table = std::make_from_tuple<table_t>(columns);
 
     joined_table.reserve(std::min({tables.size()...}));
 
