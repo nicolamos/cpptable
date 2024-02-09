@@ -55,6 +55,24 @@ template <typename T>
 constexpr auto format_as(const position<T>& pos) { return std::make_tuple(pos.x, pos.y, pos.z); }
 
 
+struct record : public tbl::columns_type_info<int, int>
+{
+    using super = tbl::columns_type_info<int, int>;
+    using column_tuple = typename super::column_tuple;
+    using header_size_t = typename super::header_size_t;
+    static constexpr header_size_t size{};
+    constexpr record() = default;
+    constexpr record(int x, int y) : x{x}, y{y} {}
+    int x{}, y{};
+};
+
+
+constexpr auto format_as(const record& r)
+{
+    return fmt::format("{{x: {}, y: {}}}", r.x, r.y);
+}
+
+
 int main()
 {
     namespace ranges = std::ranges;
@@ -138,19 +156,23 @@ int main()
     fmt::println("speed: {}", views::elements<1>(rt));
 
     // Simple join operation of table A and table B (number of rows is the minimum between the size of two tables)
-    auto tA = tbl::make_table<std::string, int>("C0", "C1", {{"ciao", 1}, {"ciao1", 2}});
+    auto tA = tbl::make_table<std::string, int>({"C0", "C1"}, {{"ciao", 1}, {"ciao1", 2}});
     auto tB = tbl::make_table<float, float>("B0", "B1");
 
     tB.emplace_back(0.1, 0.3);
     tB.emplace_back(0.5, 0.7);
 
-    // auto tjoin = tbl::table_join(tA, tB);
+    fmt::println("tB header: {}", tB.header);
 
-    // fmt::println("{}", tjoin);
+
+    auto tjoin = tbl::table_join(tA, tB);
+
+    fmt::println("{}", tjoin);
+
 
     // Missing values
     // using nullable_table = tbl::nullable_table<std::string, int>;
-    auto nt = tbl::make_table<std::string, int>(tbl::nullable, "C0", "C1", { {"CIAO", std::nullopt} });
+    auto nt = tbl::make_table<std::string, int>(tbl::nullable, {"C0", "C1"}, { {"CIAO", std::nullopt} });
     auto nt2 = tbl::make_table<std::string, int>(tbl::nullable, "C0", "C1");
 
     fmt::println("{}", nt);
@@ -159,7 +181,16 @@ int main()
     std::get<1>(tA[0]) = 10;
     fmt::println("{}", tA);
 
-    fmt::println("{}", tA.header.size());
+    fmt::println("number of columns: {}", tA.header.size());
+
+    // Test record table
+    using record_table = tbl::basic_table<tbl::record_header<record>>;
+    record_table rrt{
+        {"R0", "R1"},
+        {{1,1}, {2,2}}
+    };
+
+    fmt::println("record table: {}", rrt);
 
     return 0;
 }

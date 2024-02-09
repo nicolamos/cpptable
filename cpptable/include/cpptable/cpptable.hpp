@@ -18,28 +18,6 @@ namespace tbl
 namespace detail
 {
 
-// template <typename ...TablesT>
-// struct table_join_value_types
-// {
-
-// using type = std::tuple<TablesT::header_type>
-
-// };
-
-}
-
-template <typename T, typename StringT = std::string>
-struct column_info
-{
-    using value_type = T;
-    using string_type = StringT;
-    constexpr column_info() = default;
-    template <std::convertible_to<string_type> NameT>
-    constexpr column_info(NameT name) : name{std::move(name)} {}
-    string_type name;
-};
-
-
 template <std::size_t ...Is>
 constexpr auto to_string_tuple(std::index_sequence<Is...>)
 {
@@ -53,13 +31,40 @@ constexpr auto to_string_tuple()
     return to_string_tuple(std::index_sequence_for<Ts...>{});
 }
 
+}
+
+
+template <typename T, typename StringT = std::string>
+class column_info
+{
+public:
+    using value_type = T;
+    using string_type = StringT;
+
+    constexpr column_info() = default;
+
+    template <std::convertible_to<string_type> NameT>
+    constexpr column_info(NameT&& name) : name{std::forward<NameT>(name)} {}
+
+    string_type name;
+};
+
 
 template <typename ...Ts>
-struct default_header
+struct columns_type_info
 {
-    using row_type = std::tuple<Ts...>;
     using column_tuple = std::tuple<column_info<Ts>...>;
-    using header_size_t = std::tuple_size<row_type>;
+    using header_size_t = std::tuple_size<column_tuple>;
+};
+
+
+template <typename ...Ts>
+struct default_header : public columns_type_info<Ts...>
+{
+    using super = columns_type_info<Ts...>;
+    using column_tuple = typename super::column_tuple;
+    using header_size_t = typename super::header_size_t;
+    using row_type = std::tuple<Ts...>;
 
     constexpr default_header() = default;
     constexpr default_header(column_info<Ts> ...cinfo) : columns{std::move(cinfo)...} {}
@@ -73,17 +78,34 @@ struct default_header
     template <std::size_t I>
     using column_t = typename column<I>::type;
 
-
     static constexpr header_size_t size{};
-    column_tuple columns{to_string_tuple<Ts...>()};
+    column_tuple columns{detail::to_string_tuple<Ts...>()};
 };
 
 
-template <typename ...Ts>
-constexpr auto make_header(column_info<Ts>&& ...cinfo)
+template <typename RowT>
+class record_header
 {
-    return default_header<Ts...>(std::forward<column_info<Ts>>(cinfo)...);
-}
+public:
+    using row_type = RowT;
+    using column_tuple = typename row_type::column_tuple;
+
+    constexpr record_header() = default;
+    template <typename ...Args>
+    constexpr record_header(Args&& ...args) : columns{std::move(args)...} {}
+
+    constexpr auto names() const {
+        return std::apply([](auto const& ...args) { return std::array<std::string, sizeof...(args)>{args.name...}; }, columns);
+    }
+
+    template <std::size_t I>
+    struct column { using type = typename std::tuple_element_t<I, column_tuple>::value_type; };
+    template <std::size_t I>
+    using column_t = typename column<I>::type;
+
+    static constexpr auto size() { return row_type::size(); };
+    column_tuple columns{};
+};
 
 
 template <
@@ -95,7 +117,6 @@ class basic_table
 public:
     using header_type = HeaderT;
     using row_type = typename header_type::row_type;
-    using column_tuple = typename header_type::column_tuple;
     using container_type = ContainerT;
     using size_type = typename container_type::size_type;
     using reference = typename container_type::reference;
@@ -108,11 +129,10 @@ public:
     constexpr basic_table() = default;
     constexpr basic_table(std::initializer_list<row_type> init) : rows_{std::move(init)} {}
     // template <std::convertible_to<std::string> ...Names>
-    // constexpr basic_table(Names&& ...names) : header{{std::string(std::forward<Names>(names))}...} {}
-    template <typename ...Ts, typename C = container_type>
-    constexpr basic_table(column_info<Ts> ...cinfo, C&& rows) : header{std::move(cinfo)...}, rows_{std::forward<ContainerT>(rows)} {}
-    // template <typename ...Ts>
-    // constexpr basic_table(column_info<Ts>&& ...cinfo) : header{std::move(cinfo)...} {}
+    // constexpr basic_table(Names&&... names) : header{{std::string(std::forward<Names>(names))}...} {}
+    template <typename H = header_type, typename C = container_type>
+        requires (std::convertible_to<H, header_type> && std::convertible_to<C, container_type>)
+    constexpr basic_table(H&& header, C&& rows = {}) : header{std::forward<H>(header)}, rows_{std::forward<C>(rows)} {}
 
     constexpr const_iterator begin() const { return rows_.begin(); }
     constexpr iterator begin() { return rows_.begin(); }
@@ -148,29 +168,30 @@ struct table : public basic_table<default_header<Ts...>>
     using super = basic_table<default_header<Ts...>>;
     using typename super::header_type;
     using typename super::row_type;
-    using typename super::column_tuple;
     using super::super;
 };
 
 
-// template <typename ...Ts, std::convertible_to<std::string> ...Names>
-// constexpr auto make_table(Names&& ...names) -> table<Ts...>
-// {
-//     return {std::forward<Names>(names)...};
-// }
-
-
-// template <typename ...Ts>
-// constexpr auto make_table(column_info<Ts> ...cinfo) -> table<Ts...>
-// {
-//     return {std::move(cinfo)...};
-// }
-
-
-template <typename ...Ts, typename ContainerT = typename table<Ts...>::container_type>
-constexpr auto make_table(column_info<Ts> ...cinfo, ContainerT&& rows = {}) -> table<Ts...>
+template <typename ...Ts, typename ...Names>
+    requires (std::convertible_to<Names, std::string> && ...) && (sizeof...(Ts) == sizeof...(Names))
+constexpr auto make_table(Names&& ...names) -> table<Ts...>
 {
-    return table<Ts...>(std::move(cinfo)..., std::forward<ContainerT>(rows));
+    return {{std::forward<Names>(names)...}};
+}
+
+
+template <
+    typename... Ts,
+    typename HeaderT = typename table<Ts...>::header_type,
+    typename ContainerT = typename table<Ts...>::container_type
+>
+    requires (
+        std::convertible_to<HeaderT, typename table<Ts...>::header_type> &&
+        std::convertible_to<ContainerT, typename table<Ts...>::container_type>
+    )
+constexpr auto make_table(HeaderT&& header, ContainerT&& rows = {}) -> table<Ts...>
+{
+    return {std::forward<HeaderT>(header), std::forward<ContainerT>(rows)};
 }
 
 
@@ -181,16 +202,12 @@ auto table_join(Tables&& ...tables)
 
     auto columns = std::tuple_cat(tables.header.columns...);
 
-    // using table_t = TableT<typename decltype(tables.header.columns)::value_type...>;
     auto joined_table = std::apply(
-        [](auto ...args) {
-            return table<typename std::decay_t<decltype(tables.header.columns)>::value_type...>(
-                std::move(args)...
-            );
+        [](auto ...args)
+        {
+            return TableT<typename std::decay_t<decltype(args)>::value_type...>{{std::move(args)...}};
         },
-        columns
-    );
-    // auto joined_table = std::make_from_tuple<table_t>(columns);
+        columns);
 
     joined_table.reserve(std::min({tables.size()...}));
 
