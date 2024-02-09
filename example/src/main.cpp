@@ -55,16 +55,14 @@ template <typename T>
 constexpr auto format_as(const position<T>& pos) { return std::make_tuple(pos.x, pos.y, pos.z); }
 
 
-struct record : public tbl::columns_type_info<int, int>
+struct record
 {
-    using super = tbl::columns_type_info<int, int>;
-    using column_tuple = typename super::column_tuple;
-    using header_size_t = typename super::header_size_t;
-    static constexpr header_size_t size{};
-    constexpr record() = default;
-    constexpr record(int x, int y) : x{x}, y{y} {}
     int x{}, y{};
 };
+
+
+template <>
+struct tbl::row_info<record> : public row_info_tuple<int, int> {};
 
 
 constexpr auto format_as(const record& r)
@@ -184,13 +182,15 @@ int main()
     fmt::println("number of columns: {}", tA.header.size());
 
     // Test record table
-    using record_table = tbl::basic_table<tbl::record_header<record>>;
+    using record_header = tbl::record_header<record>;
+    using record_table = tbl::basic_table<record_header>;
     record_table rrt{
         {"R0", "R1"},
         {{1,1}, {2,2}}
     };
 
     fmt::println("record table: {}", rrt);
+
 
     return 0;
 }

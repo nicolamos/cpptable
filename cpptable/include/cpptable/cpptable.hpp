@@ -50,21 +50,59 @@ public:
 };
 
 
+template <typename RowT> struct row_info;
+
+
 template <typename ...Ts>
-struct columns_type_info
+struct row_info<std::tuple<Ts...>>
 {
+    using row_type = std::tuple<Ts...>;
     using column_tuple = std::tuple<column_info<Ts>...>;
-    using header_size_t = std::tuple_size<column_tuple>;
+    template <std::size_t I>
+    struct column { using type = typename std::tuple_element_t<I, column_tuple>::value_type; };
+    template <std::size_t I>
+    using column_t = typename column<I>::type;
+    static constexpr auto size() { return std::tuple_size_v<row_type>; }
 };
 
 
 template <typename ...Ts>
-struct default_header : public columns_type_info<Ts...>
+using row_info_tuple = row_info<std::tuple<Ts...>>;
+
+
+template <typename RowT>
+struct columns_type_info : public row_info<RowT>
 {
-    using super = columns_type_info<Ts...>;
-    using column_tuple = typename super::column_tuple;
-    using header_size_t = typename super::header_size_t;
-    using row_type = std::tuple<Ts...>;
+    using super = row_info<RowT>;
+    using typename super::column_tuple;
+    using typename super::row_type;
+    using typename super::column;
+    using typename super::column_t;
+};
+
+
+template <typename ...Ts>
+struct columns_type_info<std::tuple<Ts...>> : public row_info_tuple<Ts...>
+{
+    using super = row_info_tuple<Ts...>;
+    using typename super::column_tuple;
+    using typename super::row_type;
+    using typename super::column;
+    using typename super::column_t;
+};
+
+
+template <typename ...Ts>
+using columns_type_info_tuple = columns_type_info<std::tuple<Ts...>>;
+
+
+
+template <typename ...Ts>
+struct default_header : public columns_type_info_tuple<Ts...>
+{
+    using super = columns_type_info_tuple<Ts...>;
+    using columns_info = super;
+    using typename super::column_tuple;
 
     constexpr default_header() = default;
     constexpr default_header(column_info<Ts> ...cinfo) : columns{std::move(cinfo)...} {}
@@ -73,22 +111,17 @@ struct default_header : public columns_type_info<Ts...>
         return std::apply([](auto const& ...args) { return std::array<std::string, sizeof...(args)>{args.name...}; }, columns);
     }
 
-    template <std::size_t I>
-    struct column { using type = typename std::tuple_element_t<I, column_tuple>::value_type; };
-    template <std::size_t I>
-    using column_t = typename column<I>::type;
-
-    static constexpr header_size_t size{};
     column_tuple columns{detail::to_string_tuple<Ts...>()};
 };
 
 
 template <typename RowT>
-class record_header
+class record_header : public columns_type_info<RowT>
 {
 public:
-    using row_type = RowT;
-    using column_tuple = typename row_type::column_tuple;
+    using super = columns_type_info<RowT>;
+    using columns_info = super;
+    using typename super::column_tuple;
 
     constexpr record_header() = default;
     template <typename ...Args>
@@ -98,12 +131,6 @@ public:
         return std::apply([](auto const& ...args) { return std::array<std::string, sizeof...(args)>{args.name...}; }, columns);
     }
 
-    template <std::size_t I>
-    struct column { using type = typename std::tuple_element_t<I, column_tuple>::value_type; };
-    template <std::size_t I>
-    using column_t = typename column<I>::type;
-
-    static constexpr auto size() { return row_type::size(); };
     column_tuple columns{};
 };
 
