@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <ranges>
 #include <optional>
+#include <typeinfo>
 #include <fmt/core.h>
 #include <fmt/ranges.h>
 #include <fmt/ostream.h>
@@ -61,14 +62,28 @@ struct record
 };
 
 
-template <>
-struct tbl::row_info<record> : public row_info_tuple<int, int> {};
-
-
-constexpr auto format_as(const record& r)
+constexpr std::ostream& operator<<(std::ostream& os, const record& r)
 {
-    return fmt::format("{{x: {}, y: {}}}", r.x, r.y);
+    return os << fmt::format("{{x: {}, y: {}}}", r.x, r.y);
 }
+
+
+template <>
+struct tbl::row_record<record> : public record
+{
+    constexpr row_record() = default;
+    constexpr row_record(int x, int y) : record{x, y} {}
+};
+
+
+template <>
+struct tbl::row_info<tbl::row_record<record>> : public row_info_tuple<int, int>
+{
+    using super = row_info_tuple<int, int>;
+    using tuple_type = typename super::row_type;
+    using row_type = row_record<record>;
+    using typename super::column_tuple;
+};
 
 
 int main()
@@ -190,7 +205,6 @@ int main()
     };
 
     fmt::println("record table: {}", rrt);
-
 
     return 0;
 }

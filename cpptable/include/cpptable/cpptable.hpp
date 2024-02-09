@@ -115,11 +115,19 @@ struct default_header : public columns_type_info_tuple<Ts...>
 };
 
 
+template <typename RecordT>
+struct row_record;
+
+
 template <typename RowT>
-class record_header : public columns_type_info<RowT>
+using columns_type_info_record = columns_type_info<row_record<RowT>>;
+
+
+template <typename RowT>
+class record_header : public columns_type_info_record<RowT>
 {
 public:
-    using super = columns_type_info<RowT>;
+    using super = columns_type_info_record<RowT>;
     using columns_info = super;
     using typename super::column_tuple;
 
