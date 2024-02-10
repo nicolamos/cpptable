@@ -1,5 +1,6 @@
 #include <iostream>
 #include <tuple>
+#include <variant>
 #include <algorithm>
 #include <ranges>
 #include <optional>
@@ -62,7 +63,9 @@ struct record
 };
 
 
-constexpr std::ostream& operator<<(std::ostream& os, const record& r)
+template <typename T>
+    requires std::derived_from<T, record>
+constexpr std::ostream& operator<<(std::ostream& os, const T& r)
 {
     return os << fmt::format("{{x: {}, y: {}}}", r.x, r.y);
 }
@@ -77,13 +80,7 @@ struct tbl::row_record<record> : public record
 
 
 template <>
-struct tbl::row_info<tbl::row_record<record>> : public row_info_tuple<int, int>
-{
-    using super = row_info_tuple<int, int>;
-    using tuple_type = typename super::row_type;
-    using row_type = row_record<record>;
-    using typename super::column_tuple;
-};
+struct tbl::row_record_tuple<record> : public tbl::row_info_tuple<int, int> {};
 
 
 int main()

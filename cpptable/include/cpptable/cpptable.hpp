@@ -34,6 +34,19 @@ constexpr auto to_string_tuple()
 }
 
 
+template <typename RowT> struct row_info;
+template <typename RowT> struct columns_type_info;
+template <typename RecordT> struct row_record;
+template <typename RecordT> struct row_record_tuple;
+
+
+template <typename RecordT>
+struct row_info_record : public row_record_tuple<RecordT>
+{
+    using row_type = row_record<RecordT>;
+};
+
+
 template <typename T, typename StringT = std::string>
 class column_info
 {
@@ -50,13 +63,11 @@ public:
 };
 
 
-template <typename RowT> struct row_info;
-
-
 template <typename ...Ts>
 struct row_info<std::tuple<Ts...>>
 {
-    using row_type = std::tuple<Ts...>;
+    using tuple_type = std::tuple<Ts...>;
+    using row_type = tuple_type;
     using column_tuple = std::tuple<column_info<Ts>...>;
     template <std::size_t I>
     struct column { using type = typename std::tuple_element_t<I, column_tuple>::value_type; };
@@ -66,35 +77,28 @@ struct row_info<std::tuple<Ts...>>
 };
 
 
+template <typename RecordT>
+struct row_info<row_record<RecordT>> : public row_info_record<RecordT> {};
+
+
 template <typename ...Ts>
 using row_info_tuple = row_info<std::tuple<Ts...>>;
 
 
 template <typename RowT>
-struct columns_type_info : public row_info<RowT>
-{
-    using super = row_info<RowT>;
-    using typename super::column_tuple;
-    using typename super::row_type;
-    using typename super::column;
-    using typename super::column_t;
-};
+struct columns_type_info : public row_info<RowT> {};
 
 
 template <typename ...Ts>
-struct columns_type_info<std::tuple<Ts...>> : public row_info_tuple<Ts...>
-{
-    using super = row_info_tuple<Ts...>;
-    using typename super::column_tuple;
-    using typename super::row_type;
-    using typename super::column;
-    using typename super::column_t;
-};
+struct columns_type_info<std::tuple<Ts...>> : public row_info_tuple<Ts...> {};
 
 
 template <typename ...Ts>
 using columns_type_info_tuple = columns_type_info<std::tuple<Ts...>>;
 
+
+template <typename RecordT>
+using columns_type_info_record = columns_type_info<row_record<RecordT>>;
 
 
 template <typename ...Ts>
@@ -116,18 +120,10 @@ struct default_header : public columns_type_info_tuple<Ts...>
 
 
 template <typename RecordT>
-struct row_record;
-
-
-template <typename RowT>
-using columns_type_info_record = columns_type_info<row_record<RowT>>;
-
-
-template <typename RowT>
-class record_header : public columns_type_info_record<RowT>
+class record_header : public columns_type_info_record<RecordT>
 {
 public:
-    using super = columns_type_info_record<RowT>;
+    using super = columns_type_info_record<RecordT>;
     using columns_info = super;
     using typename super::column_tuple;
 
@@ -201,8 +197,6 @@ template <typename ...Ts>
 struct table : public basic_table<default_header<Ts...>>
 {
     using super = basic_table<default_header<Ts...>>;
-    using typename super::header_type;
-    using typename super::row_type;
     using super::super;
 };
 
