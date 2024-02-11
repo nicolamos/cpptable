@@ -77,8 +77,4 @@ struct fmt::formatter<tbl::formattable_optional<T>>
     }
 };
 
-
-template <typename R>
-struct fmt::formatter<tbl::row_record<R>> : public fmt::ostream_formatter {};
-
 #endif // CPPTABLE_FORMAT_HPP

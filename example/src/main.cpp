@@ -63,24 +63,15 @@ struct record
 };
 
 
-template <typename T>
-    requires std::derived_from<T, record>
-constexpr std::ostream& operator<<(std::ostream& os, const T& r)
+constexpr std::ostream& operator<<(std::ostream& os, const record& r)
 {
     return os << fmt::format("{{x: {}, y: {}}}", r.x, r.y);
 }
 
 
-template <>
-struct tbl::row_record<record> : public record
-{
-    constexpr row_record() = default;
-    constexpr row_record(int x, int y) : record{x, y} {}
-};
-
-
-template <>
-struct tbl::row_record_tuple<record> : public tbl::row_info_tuple<int, int> {};
+template <typename T>
+    requires std::derived_from<T, record>
+struct fmt::formatter<T> : public fmt::ostream_formatter {};
 
 
 int main()
@@ -194,8 +185,7 @@ int main()
     fmt::println("number of columns: {}", tA.header.size());
 
     // Test record table
-    using record_header = tbl::record_header<record>;
-    using record_table = tbl::basic_table<record_header>;
+    using record_table = tbl::record_table<record, int, int>;
     record_table rrt{
         {"R0", "R1"},
         {{1,1}, {2,2}}

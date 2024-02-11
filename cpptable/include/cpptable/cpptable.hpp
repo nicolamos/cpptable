@@ -31,20 +31,14 @@ constexpr auto to_string_tuple()
     return to_string_tuple(std::index_sequence_for<Ts...>{});
 }
 
-}
+} // namespace detail
 
 
 template <typename RowT> struct row_info;
 template <typename RowT> struct columns_type_info;
 template <typename RecordT> struct row_record;
-template <typename RecordT> struct row_record_tuple;
-
-
-template <typename RecordT>
-struct row_info_record : public row_record_tuple<RecordT>
-{
-    using row_type = row_record<RecordT>;
-};
+template <typename RecordT, typename ...Ts> struct row_record_tuple;
+template <typename RecordT, typename ...Ts> struct row_info_record;
 
 
 template <typename T, typename StringT = std::string>
@@ -77,8 +71,8 @@ struct row_info<std::tuple<Ts...>>
 };
 
 
-template <typename RecordT>
-struct row_info<row_record<RecordT>> : public row_info_record<RecordT> {};
+template <typename RecordT, typename ...Ts>
+struct row_info<row_record_tuple<RecordT, Ts...>> : public row_info_record<RecordT, Ts...> {};
 
 
 template <typename ...Ts>
@@ -97,8 +91,15 @@ template <typename ...Ts>
 using columns_type_info_tuple = columns_type_info<std::tuple<Ts...>>;
 
 
-template <typename RecordT>
-using columns_type_info_record = columns_type_info<row_record<RecordT>>;
+template <typename RecordT, typename ...Ts>
+using columns_type_info_record = columns_type_info<row_record_tuple<RecordT, Ts...>>;
+
+
+template <typename RecordT, typename ...Ts>
+struct row_info_record : public row_info_tuple<Ts...>
+{
+    using row_type = RecordT;
+};
 
 
 template <typename ...Ts>
@@ -119,11 +120,11 @@ struct default_header : public columns_type_info_tuple<Ts...>
 };
 
 
-template <typename RecordT>
-class record_header : public columns_type_info_record<RecordT>
+template <typename RecordT, typename ...Ts>
+class record_header : public columns_type_info_record<RecordT, Ts...>
 {
 public:
-    using super = columns_type_info_record<RecordT>;
+    using super = columns_type_info_record<RecordT, Ts...>;
     using columns_info = super;
     using typename super::column_tuple;
 
@@ -199,6 +200,10 @@ struct table : public basic_table<default_header<Ts...>>
     using super = basic_table<default_header<Ts...>>;
     using super::super;
 };
+
+
+template <typename RecordT, typename ...Ts>
+using record_table = basic_table<record_header<RecordT, Ts...>>;
 
 
 template <typename ...Ts, typename ...Names>
