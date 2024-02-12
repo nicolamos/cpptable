@@ -195,5 +195,11 @@ int main()
 
     fmt::println("record table: {}", rrt | as_tuple | views::elements<1>);
 
+    // Materialize column into vector
+    auto column_from_record = rrt | as_tuple | views::elements<1>;
+    std::vector record_vec(column_from_record.begin(), column_from_record.end());
+
+    fmt::println("column from record table: {}", record_vec);
+
     return 0;
 }
