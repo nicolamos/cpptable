@@ -191,7 +191,9 @@ int main()
         {{1,1}, {2,2}}
     };
 
-    fmt::println("record table: {}", rrt);
+    auto as_tuple = views::transform([](auto const& row) { return std::tie(row.x, row.y); });
+
+    fmt::println("record table: {}", rrt | as_tuple | views::elements<1>);
 
     return 0;
 }

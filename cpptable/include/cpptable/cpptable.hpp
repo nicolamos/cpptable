@@ -36,7 +36,6 @@ constexpr auto to_string_tuple()
 
 template <typename RowT> struct row_info;
 template <typename RowT> struct columns_type_info;
-template <typename RecordT> struct row_record;
 template <typename RecordT, typename ...Ts> struct row_record_tuple;
 template <typename RecordT, typename ...Ts> struct row_info_record;
 
